@@ -1,10 +1,12 @@
-# 🏢 Room Display & Booking System
+# 🏢 Room Display & Booking System (vibe-coded)
 
 Ein modernes Raum-Display- und Buchungssystem basierend auf **Laravel**, **Filament Admin Panel** und **Microsoft Exchange (EWS)**.
 
 Perfekt für Meetingräume mit Tablet-Displays an der Tür.
 
 ---
+
+![Dashboard](images/image.png)
 
 ## ✨ Features
 

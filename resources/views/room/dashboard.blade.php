@@ -92,7 +92,7 @@
 
             <div>
                 <div>
-                    <img style="display: inline-block;" src="https://www.doepke.de/typo3conf/ext/doepke/Resources/Public/img/logo.svg" width="135px" alt="">
+                    <h1 style="font-size: 30px;">LOGO</h1>
                 </div>
 
                 <h1 class="text-6xl font-bold flex items-center gap-5 pt-3">
