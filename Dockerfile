@@ -10,6 +10,8 @@ RUN apk add --no-cache \
     libzip-dev \
     oniguruma-dev \
     mariadb-client \
+    nodejs \
+    npm \
     $PHPIZE_DEPS \
     && docker-php-ext-install \
     pdo_mysql \
@@ -21,9 +23,8 @@ RUN apk add --no-cache \
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-COPY . /var/www/html
-
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache || true
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 RUN mkdir -p \
     storage/app \
@@ -34,7 +35,8 @@ RUN mkdir -p \
     bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R ug+rwX storage bootstrap/cache
-    
+
 USER www-data
 
+ENTRYPOINT ["entrypoint.sh"]
 CMD ["php-fpm"]
