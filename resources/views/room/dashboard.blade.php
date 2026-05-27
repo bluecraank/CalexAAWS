@@ -92,7 +92,11 @@
 
             <div>
                 <div>
-                    <h1 style="font-size: 30px;">LOGO</h1>
+                    @if($logoSrc)
+                        <img src="{{ $logoSrc }}" alt="Logo" style="max-height: 48px; max-width: 200px;" class="object-contain">
+                    @else
+                        <h1 style="font-size: 30px;">LOGO</h1>
+                    @endif
                 </div>
 
                 <h1 class="text-6xl font-bold flex items-center gap-5 pt-3">

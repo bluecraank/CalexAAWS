@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Room;
+use App\Models\Setting;
+use Illuminate\Support\Facades\Storage;
 
 class RoomDashboardController extends Controller
 {
@@ -12,6 +14,10 @@ class RoomDashboardController extends Controller
             ->with('events')
             ->firstOrFail();
 
-        return view('room.dashboard', compact('room'));
+        $logoPath = Setting::get('logo_path');
+        $logoUrl  = Setting::get('logo_url');
+        $logoSrc  = $logoPath ? Storage::url($logoPath) : ($logoUrl ?: null);
+
+        return view('room.dashboard', compact('room', 'logoSrc'));
     }
 }
