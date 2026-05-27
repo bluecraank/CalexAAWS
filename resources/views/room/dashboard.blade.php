@@ -127,7 +127,7 @@
                             🔴 Belegt
                         </span>
 
-                        @elseif($next && $minutes <= 15)
+                        @elseif($next && $minutes <= $warningThreshold)
 
                             <span class="text-yellow-400">
                             🟡 Nur noch kurz verfügbar
@@ -419,25 +419,24 @@
 
                 <div id="bookingMessage" class="hidden mb-4 text-sm rounded-lg px-4 py-2"></div>
 
-                <div class="grid grid-cols-3 gap-3">
+                @php
+                    $durationLabels = [
+                        '15' => '15 Min', '30' => '30 Min', '45' => '45 Min',
+                        '60' => '1 Std', '90' => '1,5 Std',
+                        '120' => '2 Std', '180' => '3 Std', '240' => '4 Std',
+                    ];
+                    $cols = count($bookingDurations) <= 2 ? count($bookingDurations) : 3;
+                @endphp
+                <div class="grid gap-3" style="grid-template-columns: repeat({{ $cols }}, minmax(0, 1fr))">
 
+                    @foreach($bookingDurations as $duration)
                     <button
-                        onclick="bookRoom(30, this)"
+                        onclick="bookRoom({{ $duration }}, this)"
+                        data-label="{{ $durationLabels[$duration] ?? $duration.' Min' }}"
                         class="bg-gray-700 hover:bg-gray-600 py-3 rounded-lg text-sm">
-                        30 Min
+                        {{ $durationLabels[$duration] ?? $duration.' Min' }}
                     </button>
-
-                    <button
-                        onclick="bookRoom(60, this)"
-                        class="bg-gray-700 hover:bg-gray-600 py-3 rounded-lg text-sm">
-                        1 Stunde
-                    </button>
-
-                    <button
-                        onclick="bookRoom(120, this)"
-                        class="bg-gray-700 hover:bg-gray-600 py-3 rounded-lg text-sm">
-                        2 Stunden
-                    </button>
+                    @endforeach
 
                 </div>
 
@@ -509,7 +508,7 @@
 
             /* AUTO REFRESH */
 
-            setInterval(() => location.reload(), 30000)
+            setInterval(() => location.reload(), {{ $refreshInterval }})
 
             function openBookingModal() {
                 document.getElementById("bookingModal").classList.remove("hidden")
@@ -555,9 +554,7 @@
                         b.classList.remove("opacity-50", "cursor-not-allowed")
                     })
 
-                    btn.innerHTML = duration === 30 ? "30 Min" :
-                        duration === 60 ? "1 Stunde" :
-                        "2 Stunden"
+                    btn.innerHTML = btn.dataset.label
                 }
             }
 
@@ -647,7 +644,7 @@
         <script>
             @if($current)
             updateBackground("busy")
-            @elseif($next && $minutes <= 15)
+            @elseif($next && $minutes <= $warningThreshold)
             updateBackground("warning")
             @else
             updateBackground("free")

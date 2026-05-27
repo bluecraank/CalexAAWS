@@ -7,6 +7,7 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Section;
@@ -26,8 +27,11 @@ class GlobalSettings extends Page
     public function mount(): void
     {
         $this->form->fill([
-            'logo_path' => Setting::get('logo_path'),
-            'logo_url'  => Setting::get('logo_url'),
+            'logo_path'          => Setting::get('logo_path'),
+            'logo_url'           => Setting::get('logo_url'),
+            'warning_threshold'  => (int) Setting::get('warning_threshold', 15),
+            'refresh_interval'   => (int) Setting::get('refresh_interval', 30),
+            'booking_durations'  => json_decode(Setting::get('booking_durations', '["30","60","120"]'), true),
         ]);
     }
 
@@ -52,6 +56,47 @@ class GlobalSettings extends Page
                             ->url()
                             ->placeholder('https://example.com/logo.png')
                             ->nullable(),
+                    ]),
+
+                Section::make('Dashboard')
+                    ->schema([
+                        TextInput::make('warning_threshold')
+                            ->label('"Bald belegt"-Schwellenwert (Minuten)')
+                            ->helperText('Ab wie vielen Minuten vor einem Termin der Raum als "bald belegt" gilt.')
+                            ->numeric()
+                            ->minValue(1)
+                            ->maxValue(60)
+                            ->default(15)
+                            ->required(),
+
+                        TextInput::make('refresh_interval')
+                            ->label('Auto-Refresh-Intervall (Sekunden)')
+                            ->helperText('Wie oft sich das Dashboard automatisch aktualisiert.')
+                            ->numeric()
+                            ->minValue(10)
+                            ->maxValue(300)
+                            ->default(30)
+                            ->required(),
+                    ])
+                    ->columns(2),
+
+                Section::make('Buchungsoptionen')
+                    ->description('Welche Buchungsdauern sollen auf dem Dashboard angeboten werden?')
+                    ->schema([
+                        CheckboxList::make('booking_durations')
+                            ->label('Verfügbare Buchungsdauern')
+                            ->options([
+                                '15'  => '15 Minuten',
+                                '30'  => '30 Minuten',
+                                '45'  => '45 Minuten',
+                                '60'  => '1 Stunde',
+                                '90'  => '1,5 Stunden',
+                                '120' => '2 Stunden',
+                                '180' => '3 Stunden',
+                                '240' => '4 Stunden',
+                            ])
+                            ->columns(4)
+                            ->required(),
                     ]),
             ]);
     }
@@ -89,6 +134,9 @@ class GlobalSettings extends Page
         }
 
         Setting::set('logo_url', $data['logo_url'] ?? null);
+        Setting::set('warning_threshold', $data['warning_threshold'] ?? 15);
+        Setting::set('refresh_interval', $data['refresh_interval'] ?? 30);
+        Setting::set('booking_durations', json_encode($data['booking_durations'] ?? ['30', '60', '120']));
 
         Notification::make()
             ->title('Einstellungen gespeichert')
