@@ -71,7 +71,7 @@ Route::get('/room-end/{token}', function ($token) {
 });
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/admin');
 });
 
 Route::get('/room-dashboard/{token}', [RoomDashboardController::class, 'show']);
