@@ -1,5 +1,11 @@
 FROM php:8.4-fpm-alpine
 
+# Node.js vom offiziellen Image kopieren (alpine apk-version ist zu alt für npm ci)
+COPY --from=node:20-alpine /usr/local/bin/node /usr/local/bin/node
+COPY --from=node:20-alpine /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
+
 WORKDIR /var/www/html
 
 RUN apk add --no-cache \
@@ -10,8 +16,6 @@ RUN apk add --no-cache \
     libzip-dev \
     oniguruma-dev \
     mariadb-client \
-    nodejs \
-    npm \
     $PHPIZE_DEPS \
     && docker-php-ext-install \
     pdo_mysql \
@@ -33,10 +37,7 @@ RUN mkdir -p \
     storage/framework/views \
     storage/logs \
     bootstrap/cache \
-    && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R ug+rwX storage bootstrap/cache
-
-USER www-data
 
 ENTRYPOINT ["entrypoint.sh"]
 CMD ["php-fpm"]
