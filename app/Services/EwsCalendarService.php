@@ -61,7 +61,7 @@ class EwsCalendarService
         curl_close($ch);
 
         if ($httpCode < 200 || $httpCode >= 300) {
-            throw new RuntimeException("EWS antwortete mit HTTP $httpCode: " . $response);
+            throw new RuntimeException($this->httpErrorMessage($httpCode, $response));
         }
 
         return $this->parseCalendarItems($response);
@@ -161,6 +161,31 @@ XML;
         return htmlspecialchars($value, ENT_XML1 | ENT_QUOTES, 'UTF-8');
     }
 
+    private function httpErrorMessage(int $code, string $body): string
+    {
+        $hints = [
+            401 => 'Authentifizierung fehlgeschlagen (falscher Benutzer/Passwort oder Domain)',
+            403 => 'Zugriff verweigert',
+            404 => 'EWS-Endpunkt nicht gefunden – URL prüfen',
+            500 => 'Interner Serverfehler auf dem Exchange-Server',
+            503 => 'Exchange-Server nicht erreichbar',
+        ];
+
+        $hint = $hints[$code] ?? null;
+
+        // HTML-Body lesbar machen
+        $clean = trim(strip_tags($body));
+        $clean = preg_replace('/\s+/', ' ', $clean);
+        $clean = mb_substr($clean, 0, 200);
+        $clean = trim($clean);
+
+        $parts = ["HTTP $code"];
+        if ($hint) $parts[] = $hint;
+        if ($clean !== '') $parts[] = $clean;
+
+        return implode(' – ', $parts);
+    }
+
     public function createEntry(
         Room $room,
         Carbon $start,
@@ -210,7 +235,7 @@ XML;
         curl_close($ch);
 
         if ($httpCode < 200 || $httpCode >= 300) {
-            throw new RuntimeException("EWS antwortete mit HTTP $httpCode: " . $response);
+            throw new RuntimeException($this->httpErrorMessage($httpCode, $response));
         }
 
         $doc = new SimpleXMLElement($response);
