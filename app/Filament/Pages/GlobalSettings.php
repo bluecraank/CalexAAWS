@@ -5,16 +5,19 @@ namespace App\Filament\Pages;
 use App\Models\Setting;
 use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Notifications\Notification;
-use Filament\Pages\Page;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
-use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 
 class GlobalSettings extends Page
 {
@@ -27,11 +30,11 @@ class GlobalSettings extends Page
     public function mount(): void
     {
         $this->form->fill([
-            'logo_path'          => Setting::get('logo_path'),
-            'logo_url'           => Setting::get('logo_url'),
-            'warning_threshold'  => (int) Setting::get('warning_threshold', 15),
-            'refresh_interval'   => (int) Setting::get('refresh_interval', 30),
-            'booking_durations'  => json_decode(Setting::get('booking_durations', '["30","60","120"]'), true),
+            // logo_path bewusst NICHT befüllen – FileUpload nur für neue Uploads
+            'logo_url'          => Setting::get('logo_url'),
+            'warning_threshold' => (int) Setting::get('warning_threshold', 15),
+            'refresh_interval'  => (int) Setting::get('refresh_interval', 30),
+            'booking_durations' => json_decode(Setting::get('booking_durations', '["30","60","120"]'), true),
         ]);
     }
 
@@ -43,8 +46,25 @@ class GlobalSettings extends Page
                 Section::make('Logo')
                     ->description('Entweder eine Datei hochladen oder eine URL angeben. Die hochgeladene Datei hat Vorrang.')
                     ->schema([
+                        Placeholder::make('logo_preview')
+                            ->label('Aktuelles Logo')
+                            ->content(function (): HtmlString {
+                                $path = Setting::get('logo_path');
+                                $url  = $path
+                                    ? Storage::disk('public')->url($path)
+                                    : Setting::get('logo_url');
+
+                                if (! $url) {
+                                    return new HtmlString('<span style="color:#9ca3af">Kein Logo gesetzt</span>');
+                                }
+
+                                return new HtmlString(
+                                    '<img src="' . e($url) . '" style="max-height:64px;max-width:240px;object-fit:contain;">'
+                                );
+                            }),
+
                         FileUpload::make('logo_path')
-                            ->label('Logo hochladen')
+                            ->label('Neues Logo hochladen (ersetzt das aktuelle)')
                             ->image()
                             ->disk('public')
                             ->directory('logos')
@@ -127,10 +147,9 @@ class GlobalSettings extends Page
     {
         $data = $this->form->getState();
 
-        if ($data['logo_path']) {
+        // Nur überschreiben wenn wirklich ein neues Bild hochgeladen wurde
+        if (! empty($data['logo_path'])) {
             Setting::set('logo_path', $data['logo_path']);
-        } elseif (array_key_exists('logo_path', $data)) {
-            Setting::set('logo_path', null);
         }
 
         Setting::set('logo_url', $data['logo_url'] ?? null);
