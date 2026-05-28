@@ -2,49 +2,91 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Pages\Page;
 use App\Models\Room;
-use App\Models\RoomEvent;
-use Carbon\Carbon;
 use BackedEnum;
+use Carbon\Carbon;
+use Filament\Pages\Page;
+use Filament\Schemas\Components\EmbeddedTable;
+use Filament\Schemas\Schema;
+use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
-class RoomOverview extends Page
+class RoomOverview extends Page implements Tables\Contracts\HasTable
 {
+    use Tables\Concerns\InteractsWithTable;
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-building-office';
-    protected string $view = 'filament.pages.room-overview';
     protected static ?string $navigationLabel = 'Raumübersicht';
 
-    public $rooms;
-
-    public function mount()
+    public function content(Schema $schema): Schema
     {
-        $this->rooms = Room::with(['events' => function ($query) {
-            $query->whereDate('start', today());
-        }])->get();
+        return $schema->components([
+            EmbeddedTable::make(),
+        ]);
     }
 
-    public function getRoomStatus($room)
+    public function table(Table $table): Table
     {
-        $now = Carbon::now();
+        return $table
+            ->query(
+                Room::with(['events' => fn ($q) => $q->whereDate('start', today())])
+            )
+            ->columns([
+                TextColumn::make('name')
+                    ->label('Raum')
+                    ->sortable()
+                    ->searchable(),
 
-        $event = $room->events
-            ->where('start', '<=', $now)
-            ->where('end', '>=', $now)
-            ->first();
+                TextColumn::make('capacity')
+                    ->label('Kapazität')
+                    ->formatStateUsing(fn ($state) => $state . ' Pers.')
+                    ->sortable(),
 
-        if ($event) {
-            return ['status' => 'belegt', 'color' => 'red'];
-        }
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->state(function (Room $room): string {
+                        $now = Carbon::now();
+                        $current = $room->events
+                            ->first(fn ($e) => $e->start <= $now && $e->end >= $now);
+                        if ($current) return 'belegt';
+                        $next = $room->events
+                            ->where('start', '>', $now)
+                            ->sortBy('start')
+                            ->first();
+                        if ($next && $next->start->diffInMinutes($now) <= 15) return 'bald';
+                        return 'frei';
+                    })
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'belegt' => 'danger',
+                        'bald'   => 'warning',
+                        default  => 'success',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'belegt' => 'Belegt',
+                        'bald'   => 'Bald belegt',
+                        default  => 'Frei',
+                    }),
 
-        $next = $room->events
-            ->where('start', '>', $now)
-            ->sortBy('start')
-            ->first();
-
-        if ($next && $next->start->diffInMinutes($now) <= 10) {
-            return ['status' => 'bald belegt', 'color' => 'yellow'];
-        }
-
-        return ['status' => 'frei', 'color' => 'green'];
+                TextColumn::make('equipment')
+                    ->label('Ausstattung')
+                    ->state(function (Room $room): string {
+                        $labels = [
+                            'computer' => 'Computer',
+                            'beamer'   => 'Beamer',
+                            'wireless' => 'Wireless',
+                            'monitor'  => 'Monitor',
+                            'meeting'  => 'Mikrofon',
+                        ];
+                        return collect($room->equipment ?? [])
+                            ->map(fn ($e) => $labels[$e] ?? $e)
+                            ->join(', ');
+                    })
+                    ->wrap(),
+            ])
+            ->defaultSort('name')
+            ->paginated(false);
     }
 }
