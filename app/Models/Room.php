@@ -18,6 +18,8 @@ class Room extends Model
         'capacity',
         'equipment',
         'last_sync_at',
+        'sync_status',
+        'sync_message',
         'dashboard_token'
     ];
 
