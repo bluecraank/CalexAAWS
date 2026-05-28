@@ -3,9 +3,6 @@ set -e
 
 git config --global --add safe.directory /var/www/html 2>/dev/null || true
 
-# .env anlegen falls nicht vorhanden
-[ -f .env ] || cp .env.example .env
-
 echo "→ composer install"
 composer install --no-dev --optimize-autoloader --no-interaction
 
@@ -18,6 +15,9 @@ if [ "${SKIP_ASSETS:-false}" != "true" ]; then
     echo "→ npm run build"
     npm run build
 fi
+
+echo "→ cp stack.env .env"
+cp stack.env .env
 
 # APP_KEY nur generieren falls noch keiner gesetzt ist
 grep -q "^APP_KEY=base64:" .env 2>/dev/null || php artisan key:generate --force
