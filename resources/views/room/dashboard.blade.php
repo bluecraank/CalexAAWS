@@ -123,20 +123,20 @@
 
                         @if($current)
 
-                        <span class="text-red-400">
-                            🔴 Belegt
+                        <span class="inline-flex items-center gap-2 text-red-400">
+                            <span class="inline-block w-4 h-4 rounded-full bg-red-400"></span> Belegt
                         </span>
 
                         @elseif($next && $minutes <= $warningThreshold)
 
-                            <span class="text-yellow-400">
-                            🟡 Nur noch kurz verfügbar
+                            <span class="inline-flex items-center gap-2 text-yellow-400">
+                                <span class="inline-block w-4 h-4 rounded-full bg-yellow-400"></span> Nur noch kurz verfügbar
                             </span>
 
                             @else
 
-                            <span class="text-green-400">
-                                🟢 Frei
+                            <span class="inline-flex items-center gap-2 text-green-400">
+                                <span class="inline-block w-4 h-4 rounded-full bg-green-400"></span> Frei
                             </span>
 
                             @endif
