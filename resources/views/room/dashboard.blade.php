@@ -82,6 +82,9 @@
 <!-- <body class="bg-gray-900 text-gray-200 h-screen"> -->
 
 <body id="pageBody" class="bg-gray-900 text-gray-200 h-screen relative overflow-hidden">
+    <div id="offline-banner" class="hidden fixed top-0 inset-x-0 z-50 bg-yellow-500 text-black text-center py-2 text-sm font-semibold">
+        Keine Verbindung zum Server – Daten werden nicht aktualisiert
+    </div>
     <div id="statusGradient"
         class="pointer-events-none absolute inset-0 transition-all duration-1000">
     </div>
@@ -119,7 +122,7 @@
 
 
                     {{-- STATUS --}}
-                    <div class="mt-8 text-4xl font-semibold">
+                    <div id="status-block" class="mt-8 text-4xl font-semibold">
 
                         @if($current)
 
@@ -145,6 +148,7 @@
 
 
                     {{-- NEXT MEETING --}}
+                    <div id="next-meeting-block">
                     @if($next)
 
                     <div class="mt-6 text-xl text-gray-400">
@@ -167,6 +171,7 @@
                     </div>
 
                     @endif
+                    </div>
 
             </div>
 
@@ -311,7 +316,7 @@
                     @endphp
 
                     {{-- SCROLLBAR NUR FÜR TERMINE --}}
-                    <div class="space-y-3 overflow-y-auto flex-1 min-h-0">
+                    <div id="calendar-events" class="space-y-3 overflow-y-auto flex-1 min-h-0">
 
                         {{-- VERGANGENE --}}
                         @foreach($pastEvents as $event)
@@ -376,7 +381,7 @@
 
 
             {{-- BUTTON --}}
-            <div class="p-8 pt-0 shrink-0">
+            <div id="action-button" class="p-8 pt-0 shrink-0">
 
                 @if($current)
 
@@ -507,8 +512,57 @@
             updateClock()
 
             /* AUTO REFRESH */
+            const ROOM_TOKEN = "{{ $room->dashboard_token }}"
 
-            setInterval(() => location.reload(), {{ $refreshInterval }})
+            setInterval(refreshData, {{ $refreshInterval }})
+
+            function escHtml(s) {
+                return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            }
+
+            function refreshData() {
+                fetch("/room-status/" + ROOM_TOKEN)
+                    .then(r => { if (!r.ok) throw new Error(); return r.json() })
+                    .then(data => {
+                        document.getElementById("offline-banner").classList.add("hidden")
+
+                        const statusEl = document.getElementById("status-block")
+                        if (data.status === "busy") {
+                            statusEl.innerHTML = '<span class="inline-flex items-center gap-2 text-red-400"><span class="inline-block w-4 h-4 rounded-full bg-red-400"></span> Belegt</span>'
+                        } else if (data.status === "warning") {
+                            statusEl.innerHTML = '<span class="inline-flex items-center gap-2 text-yellow-400"><span class="inline-block w-4 h-4 rounded-full bg-yellow-400"></span> Nur noch kurz verfügbar</span>'
+                        } else {
+                            statusEl.innerHTML = '<span class="inline-flex items-center gap-2 text-green-400"><span class="inline-block w-4 h-4 rounded-full bg-green-400"></span> Frei</span>'
+                        }
+
+                        const nextEl = document.getElementById("next-meeting-block")
+                        nextEl.innerHTML = data.nextText
+                            ? '<div class="mt-6 text-xl text-gray-400"><span class="text-white">' + escHtml(data.nextText) + '</span></div>'
+                            : ''
+
+                        let cal = ''
+                        for (const e of data.pastEvents) {
+                            cal += '<div class="rounded-xl border border-gray-700 bg-gray-900 p-2 text-sm"><div class="flex gap-3 text-gray-500"><span class="whitespace-nowrap">' + escHtml(e.start) + ' – ' + escHtml(e.end) + '</span><span class="truncate">' + escHtml(e.subject) + '</span></div></div>'
+                        }
+                        if (data.current) {
+                            cal += '<div class="rounded-xl border border-white bg-gray-900 p-4"><div class="text-sm text-gray-400">' + escHtml(data.current.start) + ' – ' + escHtml(data.current.end) + '</div><div class="text-lg font-semibold">' + escHtml(data.current.subject) + '</div></div>'
+                        }
+                        for (const e of data.futureEvents) {
+                            cal += '<div class="rounded-xl border border-gray-700 bg-gray-900 p-4"><div class="text-sm text-gray-400">' + escHtml(e.start) + ' – ' + escHtml(e.end) + '</div><div class="text-lg font-semibold">' + escHtml(e.subject) + '</div></div>'
+                        }
+                        document.getElementById("calendar-events").innerHTML = cal
+
+                        const btnEl = document.getElementById("action-button")
+                        btnEl.innerHTML = data.current
+                            ? '<button onclick="openEndModal()" class="w-full bg-red-500 text-white font-semibold py-3 rounded-xl hover:bg-red-600 transition">Termin beenden</button>'
+                            : '<button onclick="openBookingModal()" class="w-full bg-white text-black font-semibold py-3 rounded-xl hover:bg-gray-200 transition">Jetzt buchen</button>'
+
+                        updateBackground(data.status)
+                    })
+                    .catch(() => {
+                        document.getElementById("offline-banner").classList.remove("hidden")
+                    })
+            }
 
             function openBookingModal() {
                 document.getElementById("bookingModal").classList.remove("hidden")
@@ -615,7 +669,7 @@
             }
 
             function refreshRoom() {
-                window.location.reload();
+                refreshData()
             }
         </script>
 

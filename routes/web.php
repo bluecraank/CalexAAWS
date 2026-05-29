@@ -6,6 +6,7 @@ use App\Http\Controllers\RoomController;
 use App\Http\Controllers\RoomDashboardController;
 use App\Models\Room;
 use App\Models\RoomEvent;
+use App\Models\Setting;
 
 Route::get('/room-book/{token}', function ($token) {
 
@@ -68,6 +69,55 @@ Route::get('/room-end/{token}', function ($token) {
     }
 
     return response()->json(['success'=>true]);
+});
+
+Route::get('/room-status/{token}', function ($token) {
+    $room = Room::where('dashboard_token', $token)
+        ->with('events')
+        ->firstOrFail();
+
+    $warningThreshold = (int) Setting::get('warning_threshold', 15);
+    $events = $room->events->sortBy('start');
+
+    $current = $events->first(fn($e) => now()->between($e->start, $e->end));
+    $next    = $events->filter(fn($e) => $e->start > now())->first();
+    $minutes = $next ? (int) ceil(now()->diffInSeconds($next->start) / 60) : null;
+
+    if ($current) {
+        $status = 'busy';
+    } elseif ($next && $minutes <= $warningThreshold) {
+        $status = 'warning';
+    } else {
+        $status = 'free';
+    }
+
+    if ($minutes !== null) {
+        if ($minutes <= 1) {
+            $nextText = 'Nächstes Meeting in weniger als 1 Minute';
+        } elseif ($minutes <= 60) {
+            $nextText = "Nächstes Meeting in {$minutes} Minuten";
+        } elseif ($minutes <= 119) {
+            $nextText = "Für {$minutes} Minuten noch frei";
+        } else {
+            $nextText = 'Für ' . (int) ($minutes / 60) . ' Stunden noch frei';
+        }
+    } else {
+        $nextText = null;
+    }
+
+    $fmt = fn($e) => [
+        'start'   => $e->start->format('H:i'),
+        'end'     => $e->end->format('H:i'),
+        'subject' => $e->subject,
+    ];
+
+    return response()->json([
+        'status'       => $status,
+        'current'      => $current ? $fmt($current) : null,
+        'nextText'     => $nextText,
+        'pastEvents'   => $events->filter(fn($e) => $e->end < now() && $e->start->isToday())->take(-3)->values()->map($fmt),
+        'futureEvents' => $events->filter(fn($e) => $e->start > now())->take(3)->values()->map($fmt),
+    ]);
 });
 
 Route::get('/', function () {
