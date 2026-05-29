@@ -11,6 +11,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
+        body {
+            font-family: system-ui, 'Ubuntu', 'Cantarell', 'Liberation Sans', 'DejaVu Sans', sans-serif;
+        }
+
         * {
             user-select: none;
         }
