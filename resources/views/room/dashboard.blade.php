@@ -151,15 +151,21 @@
                     </div>
 
 
-                    {{-- NEXT MEETING --}}
-                    <div id="next-meeting-block">
-                    @if($next)
-
+                    {{-- RESTZEIT / NÄCHSTES MEETING --}}
                     <div class="mt-6 text-xl text-gray-400">
-
-
+                    @if($current)
+                        @php $remaining = ceil(now()->diffInSeconds($current->end) / 60); @endphp
                         <span class="text-white">
-
+                            @if($remaining <= 1)
+                                Endet in weniger als 1 Minute
+                            @elseif($remaining <= 60)
+                                Noch {{ $remaining }} Minuten belegt
+                            @else
+                                Noch {{ (int) ($remaining / 60) }} Std. {{ $remaining % 60 }} Min. belegt
+                            @endif
+                        </span>
+                    @elseif($next)
+                        <span class="text-white">
                             @if($minutes <= 1)
                                 Nächstes Meeting in weniger als 1 Minute
                             @elseif($minutes <= 60)
@@ -169,11 +175,7 @@
                             @else
                                 Für {{ (int) ($minutes / 60) }} Stunden noch frei
                             @endif
-
-                                </span>
-
-                    </div>
-
+                        </span>
                     @endif
                     </div>
 
