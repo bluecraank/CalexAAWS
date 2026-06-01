@@ -7,8 +7,8 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
@@ -16,7 +16,6 @@ use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 
 class GlobalSettings extends Page
@@ -46,12 +45,12 @@ class GlobalSettings extends Page
                 Section::make('Logo')
                     ->description('Entweder eine Datei hochladen oder eine URL angeben. Die hochgeladene Datei hat Vorrang.')
                     ->schema([
-                        Placeholder::make('logo_preview')
+                        TextEntry::make('logo_preview')
                             ->label('Aktuelles Logo')
-                            ->content(function (): HtmlString {
+                            ->state(function (): HtmlString {
                                 $path = Setting::get('logo_path');
                                 $url  = $path
-                                    ? Storage::disk('public')->url($path)
+                                    ? asset('storage/' . $path)
                                     : Setting::get('logo_url');
 
                                 if (! $url) {
@@ -61,7 +60,8 @@ class GlobalSettings extends Page
                                 return new HtmlString(
                                     '<img src="' . e($url) . '" style="max-height:64px;max-width:240px;object-fit:contain;">'
                                 );
-                            }),
+                            })
+                            ->html(),
 
                         FileUpload::make('logo_path')
                             ->label('Neues Logo hochladen (ersetzt das aktuelle)')

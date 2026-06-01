@@ -57,7 +57,7 @@ Route::get('/room-end/{token}', function ($token) {
 
     $ews = new EwsCalendarService();
 
-    $success = $ews->deleteEntry($room);
+    $ews->deleteEntry($room);
 
     $event = $room->events()
         ->where('start','<=',now())
@@ -111,11 +111,12 @@ Route::get('/room-status/{token}', function ($token) {
         'subject' => $e->subject,
     ];
 
+    $room->update(['last_seen_at' => now()]);
+
     return response()->json([
         'status'       => $status,
         'current'      => $current ? $fmt($current) : null,
         'nextText'     => $nextText,
-        'pastEvents'   => $events->filter(fn($e) => $e->end < now() && $e->start->isToday())->take(-3)->values()->map($fmt),
         'futureEvents' => $events->filter(fn($e) => $e->start > now())->take(3)->values()->map($fmt),
     ]);
 });

@@ -14,6 +14,8 @@ class RoomDashboardController extends Controller
             ->with('events')
             ->firstOrFail();
 
+        $room->update(['last_seen_at' => now()]);
+
         $logoPath = Setting::get('logo_path');
         $logoUrl  = Setting::get('logo_url');
         $logoSrc  = $logoPath ? Storage::url($logoPath) : ($logoUrl ?: null);

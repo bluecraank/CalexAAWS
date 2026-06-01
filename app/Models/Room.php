@@ -18,14 +18,16 @@ class Room extends Model
         'capacity',
         'equipment',
         'last_sync_at',
+        'last_seen_at',
         'sync_status',
         'sync_message',
         'dashboard_token'
     ];
 
     protected $casts = [
-        'equipment' => 'array',
+        'equipment'    => 'array',
         'last_sync_at' => 'datetime',
+        'last_seen_at' => 'datetime',
     ];
 
     protected static function booted()
