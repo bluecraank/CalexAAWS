@@ -152,7 +152,7 @@
 
 
                     {{-- RESTZEIT / NÄCHSTES MEETING --}}
-                    <div class="mt-6 text-xl text-gray-400">
+                    <div id="next-meeting-block" class="mt-6 text-xl text-gray-400">
                     @if($current)
                         @php $remaining = ceil(now()->diffInSeconds($current->end) / 60); @endphp
                         <span class="text-white">
@@ -557,9 +557,6 @@
                             : ''
 
                         let cal = ''
-                        for (const e of data.pastEvents) {
-                            cal += '<div class="rounded-xl border border-gray-700 bg-gray-900 p-2 text-sm"><div class="flex gap-3 text-gray-500"><span class="whitespace-nowrap">' + escHtml(e.start) + ' – ' + escHtml(e.end) + '</span><span class="truncate">' + escHtml(e.subject) + '</span></div></div>'
-                        }
                         if (data.current) {
                             cal += '<div class="rounded-xl border border-white bg-gray-900 p-4"><div class="text-sm text-gray-400">' + escHtml(data.current.start) + ' – ' + escHtml(data.current.end) + '</div><div class="text-lg font-semibold">' + escHtml(data.current.subject) + '</div></div>'
                         }

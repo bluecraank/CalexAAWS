@@ -91,7 +91,16 @@ Route::get('/room-status/{token}', function ($token) {
         $status = 'free';
     }
 
-    if ($minutes !== null) {
+    if ($current) {
+        $remaining = (int) ceil(now()->diffInSeconds($current->end) / 60);
+        if ($remaining <= 1) {
+            $nextText = 'Endet in weniger als 1 Minute';
+        } elseif ($remaining <= 60) {
+            $nextText = "Noch {$remaining} Minuten belegt";
+        } else {
+            $nextText = 'Noch ' . (int)($remaining / 60) . ' Std. ' . ($remaining % 60) . ' Min. belegt';
+        }
+    } elseif ($minutes !== null) {
         if ($minutes <= 1) {
             $nextText = 'Nächstes Meeting in weniger als 1 Minute';
         } elseif ($minutes <= 60) {
