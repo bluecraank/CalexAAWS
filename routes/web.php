@@ -120,6 +120,10 @@ Route::get('/room-status/{token}', function ($token) {
     ]);
 });
 
+Route::get('/reload-check', function () {
+    return response()->json(['token' => Setting::get('reload_token', '0')]);
+});
+
 Route::get('/', function () {
     return redirect('/admin');
 });

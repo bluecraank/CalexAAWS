@@ -134,6 +134,28 @@ class GlobalSettings extends Page
         ]);
     }
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('forceReload')
+                ->label('Alle Dashboards neu laden')
+                ->icon('heroicon-o-arrow-path')
+                ->color('warning')
+                ->requiresConfirmation()
+                ->modalHeading('Alle Dashboards neu laden?')
+                ->modalDescription('Alle geöffneten Raum-Dashboards laden sich innerhalb von 10 Sekunden automatisch neu.')
+                ->action(function () {
+                    Setting::set('reload_token', (string) now()->timestamp);
+
+                    Notification::make()
+                        ->title('Reload ausgelöst')
+                        ->body('Alle Dashboards laden sich innerhalb von 10 Sekunden neu.')
+                        ->success()
+                        ->send();
+                }),
+        ];
+    }
+
     protected function getFormActions(): array
     {
         return [

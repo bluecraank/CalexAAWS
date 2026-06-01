@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Storage;
 
 class RoomDashboardController extends Controller
 {
-    public function show($token)
+    public function show(string $token)
     {
         $room = Room::where('dashboard_token', $token)
             ->with('events')
@@ -21,7 +21,8 @@ class RoomDashboardController extends Controller
         $warningThreshold = (int) Setting::get('warning_threshold', 15);
         $refreshInterval  = (int) Setting::get('refresh_interval', 30) * 1000;
         $bookingDurations = json_decode(Setting::get('booking_durations', '["30","60","120"]'), true);
+        $reloadToken      = Setting::get('reload_token', '0');
 
-        return view('room.dashboard', compact('room', 'logoSrc', 'warningThreshold', 'refreshInterval', 'bookingDurations'));
+        return view('room.dashboard', compact('room', 'logoSrc', 'warningThreshold', 'refreshInterval', 'bookingDurations', 'reloadToken'));
     }
 }

@@ -522,6 +522,16 @@
 
             setInterval(refreshData, {{ $refreshInterval }})
 
+            /* FORCE RELOAD CHECK */
+            const RELOAD_TOKEN = "{{ $reloadToken }}"
+            setInterval(async function () {
+                try {
+                    const res = await fetch('/reload-check')
+                    const data = await res.json()
+                    if (data.token !== RELOAD_TOKEN) location.reload()
+                } catch (e) {}
+            }, 10000)
+
             function escHtml(s) {
                 return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
             }
