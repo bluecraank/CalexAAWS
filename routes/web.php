@@ -92,8 +92,8 @@ Route::get('/room-status/{token}', function ($token) {
     }
 
     if ($current) {
-        $remaining = (int) ceil(now()->diffInSeconds($current->end) / 60);
-        if ($remaining <= 1) {
+        $remaining = (int) floor(now()->diffInSeconds($current->end) / 60);
+        if ($remaining < 1) {
             $nextText = 'Endet in weniger als 1 Minute';
         } elseif ($remaining <= 60) {
             $nextText = "Noch {$remaining} Minuten belegt";
