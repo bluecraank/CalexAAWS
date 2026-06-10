@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Rooms\Schemas;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\HtmlString;
@@ -33,6 +34,12 @@ class RoomForm
 
                 TextInput::make('capacity')
                     ->numeric()
+                    ->required(),
+
+                Select::make('display_theme')
+                    ->label('Anzeige-Modus')
+                    ->options(['dark' => 'Dunkel', 'light' => 'Hell'])
+                    ->default('dark')
                     ->required(),
 
                 CheckboxList::make('equipment')

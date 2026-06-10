@@ -21,7 +21,8 @@ class Room extends Model
         'last_seen_at',
         'sync_status',
         'sync_message',
-        'dashboard_token'
+        'dashboard_token',
+        'display_theme',
     ];
 
     protected $casts = [

@@ -1,3 +1,20 @@
+@php
+$dark = ($room->display_theme ?? 'dark') === 'dark';
+$bgBody        = $dark ? 'bg-gray-900'     : 'bg-gray-50';
+$textBody      = $dark ? 'text-gray-200'   : 'text-gray-900';
+$bgCard        = $dark ? 'bg-gray-800'     : 'bg-white';
+$borderCard    = $dark ? 'border-gray-700' : 'border-gray-200';
+$bgEventCard   = $dark ? 'bg-gray-900'     : 'bg-gray-50';
+$bgEquip       = $dark ? 'bg-gray-800'     : 'bg-gray-100';
+$textHeader    = $dark ? 'text-gray-300'   : 'text-gray-700';
+$textMuted     = $dark ? 'text-gray-400'   : 'text-gray-500';
+$textPast      = $dark ? 'text-gray-500'   : 'text-gray-400';
+$textStrong    = $dark ? 'text-white'      : 'text-gray-900';
+$borderCurrent = $dark ? 'border-white'    : 'border-gray-800';
+$bgBtn         = $dark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200';
+$textBtn       = $dark ? 'text-gray-200'   : 'text-gray-800';
+$iconColor     = $dark ? 'text-white'      : 'text-gray-700';
+@endphp
 <!DOCTYPE html>
 <html lang="de">
 
@@ -45,23 +62,39 @@
             scrollbar-color: #4b5563 transparent;
         }
 
+        @if($dark)
         .free-gradient {
             background: radial-gradient(circle at bottom,
                     rgba(34, 197, 94, 0.28),
                     rgba(17, 24, 39, 0) 75%);
         }
-
         .busy-gradient {
             background: radial-gradient(circle at bottom,
                     rgba(239, 68, 68, 0.28),
                     rgba(17, 24, 39, 0) 75%);
         }
-
         .warning-gradient {
             background: radial-gradient(circle at bottom,
                     rgba(234, 179, 8, 0.18),
                     rgba(17, 24, 39, 0) 75%);
         }
+        @else
+        .free-gradient {
+            background: radial-gradient(circle at bottom,
+                    rgba(34, 197, 94, 0.20),
+                    rgba(255, 255, 255, 0) 75%);
+        }
+        .busy-gradient {
+            background: radial-gradient(circle at bottom,
+                    rgba(239, 68, 68, 0.18),
+                    rgba(255, 255, 255, 0) 75%);
+        }
+        .warning-gradient {
+            background: radial-gradient(circle at bottom,
+                    rgba(234, 179, 8, 0.14),
+                    rgba(255, 255, 255, 0) 75%);
+        }
+        @endif
 
         .spinner {
             border: 2px solid rgba(255, 255, 255, 0.2);
@@ -83,9 +116,7 @@
 </head>
 
 
-<!-- <body class="bg-gray-900 text-gray-200 h-screen"> -->
-
-<body id="pageBody" class="bg-gray-900 text-gray-200 h-screen relative overflow-hidden">
+<body id="pageBody" class="{{ $bgBody }} {{ $textBody }} h-screen relative overflow-hidden">
     <div id="offline-banner" class="hidden fixed top-0 inset-x-0 z-50 bg-yellow-500 text-black text-center py-2 text-sm font-semibold">
         Keine Verbindung zum Server – Daten werden nicht aktualisiert
     </div>
@@ -152,10 +183,10 @@
 
 
                     {{-- RESTZEIT / NÄCHSTES MEETING --}}
-                    <div id="next-meeting-block" class="mt-6 text-2xl text-gray-400">
+                    <div id="next-meeting-block" class="mt-6 text-2xl {{ $textMuted }}">
                     @if($current)
                         @php $remaining = (int) floor(now()->diffInSeconds($current->end) / 60); @endphp
-                        <span class="text-white">
+                        <span class="{{ $textStrong }}">
                             @if($remaining < 1)
                                 Endet in weniger als 1 Minute
                             @elseif($remaining <= 60)
@@ -165,7 +196,7 @@
                             @endif
                         </span>
                     @elseif($next)
-                        <span class="text-white">
+                        <span class="{{ $textStrong }}">
                             @if($minutes <= 1)
                                 Nächstes Meeting in weniger als 1 Minute
                             @elseif($minutes <= 60)
@@ -200,7 +231,7 @@
 
                 <div>
 
-                    <div class="text-2xl font-semibold mb-4 text-gray-400">
+                    <div class="text-2xl font-semibold mb-4 {{ $textMuted }}">
                         Ausstattung
                     </div>
 
@@ -208,7 +239,7 @@
 
                         @foreach($room->equipment ?? [] as $eq)
 
-                        <div class="flex items-center gap-3 bg-gray-800 px-5 py-3 rounded-lg text-xl">
+                        <div class="flex items-center gap-3 {{ $bgEquip }} px-5 py-3 rounded-lg text-xl">
 
                             @if($eq == 'computer')
 
@@ -224,7 +255,7 @@
 
                             @if($eq == 'monitor')
 
-                            <svg class="w-8 h-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-8 h-8 {{ $iconColor }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                     d="M3 5h18v12H3zM8 21h8" />
                             </svg>
@@ -259,7 +290,7 @@
 
                             @if($eq == 'wireless')
 
-                            <svg class="w-8 h-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-8 h-8 {{ $iconColor }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                     d="M8.111 16.404a5 5 0 017.778 0M5.05 13.343a9 9 0 0113.9 0M2 10.293a13 13 0 0120 0" />
                             </svg>
@@ -283,16 +314,16 @@
 
 
         {{-- RIGHT SIDE CALENDAR --}}
-        <div style="max-height: 100%; overflow: auto" class="bg-gray-800 rounded-2xl shadow-xl border border-gray-700 flex flex-col">
+        <div style="max-height: 100%; overflow: auto" class="{{ $bgCard }} rounded-2xl shadow-xl border {{ $borderCard }} flex flex-col">
 
             <div class="p-8 flex flex-col flex-1 min-h-0">
 
                 <div>
                     <div style="float:left">
-                        <h2 style="display: inline-block;" class="text-3xl font-semibold text-gray-300">
+                        <h2 style="display: inline-block;" class="text-3xl font-semibold {{ $textHeader }}">
                             {{ now()->translatedFormat('l') }}
                         </h2>
-                        <h2 style="display: block;" class="text-2xl font-semibold mb-6 text-gray-300">
+                        <h2 style="display: block;" class="text-2xl font-semibold mb-6 {{ $textHeader }}">
                             {{ now()->translatedFormat('d.m.Y')}}
 
                         </h2>
@@ -327,9 +358,9 @@
                         {{-- VERGANGENE --}}
                         @foreach($pastEvents as $event)
 
-                        <div class="rounded-xl border border-gray-700 bg-gray-900 p-3 text-base">
+                        <div class="rounded-xl border {{ $borderCard }} {{ $bgEventCard }} p-3 text-base">
 
-                            <div class="flex gap-3 text-gray-500">
+                            <div class="flex gap-3 {{ $textPast }}">
 
                                 <span class="whitespace-nowrap">
                                     {{ $event->start->format('H:i') }} – {{ $event->end->format('H:i') }}
@@ -349,9 +380,9 @@
                         {{-- AKTUELL --}}
                         @if($current)
 
-                        <div class="rounded-xl border border-white bg-gray-900 p-4">
+                        <div class="rounded-xl border {{ $borderCurrent }} {{ $bgEventCard }} p-4">
 
-                            <div class="text-base text-gray-400">
+                            <div class="text-base {{ $textMuted }}">
                                 {{ $current->start->format('H:i') }} – {{ $current->end->format('H:i') }}
                             </div>
 
@@ -367,9 +398,9 @@
                         {{-- ZUKÜNFTIG --}}
                         @foreach($futureEvents as $event)
 
-                        <div class="rounded-xl border border-gray-700 bg-gray-900 p-4">
+                        <div class="rounded-xl border {{ $borderCard }} {{ $bgEventCard }} p-4">
 
-                            <div class="text-base text-gray-400">
+                            <div class="text-base {{ $textMuted }}">
                                 {{ $event->start->format('H:i') }} – {{ $event->end->format('H:i') }}
                             </div>
 
@@ -401,7 +432,7 @@
 
                 <button
                     onclick="openBookingModal()"
-                    class="w-full bg-white text-black font-semibold py-4 text-lg rounded-xl hover:bg-gray-200 transition">
+                    class="w-full {{ $bgBtn }} {{ $textBtn }} font-semibold py-4 text-lg rounded-xl transition">
                     Jetzt buchen
                 </button>
 
@@ -415,12 +446,12 @@
             id="bookingModal"
             class="fixed inset-0 bg-black/60 flex items-center justify-center hidden z-50">
 
-            <div class="bg-gray-800 rounded-2xl p-8 w-96 border border-gray-700 relative">
+            <div class="{{ $bgCard }} rounded-2xl p-8 w-96 border {{ $borderCard }} relative">
 
                 {{-- CLOSE BUTTON --}}
                 <button
                     onclick="closeBookingModal()"
-                    class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl">
+                    class="absolute top-4 right-4 {{ $textMuted }} hover:{{ $textStrong }} text-xl">
                     ✕
                 </button>
 
@@ -444,7 +475,7 @@
                     <button
                         onclick="bookRoom({{ $duration }}, this)"
                         data-label="{{ $durationLabels[$duration] ?? $duration.' Min' }}"
-                        class="bg-gray-700 hover:bg-gray-600 py-3 rounded-lg text-sm">
+                        class="{{ $bgBtn }} {{ $textBtn }} py-3 rounded-lg text-sm">
                         {{ $durationLabels[$duration] ?? $duration.' Min' }}
                     </button>
                     @endforeach
@@ -459,12 +490,12 @@
             id="endModal"
             class="fixed inset-0 bg-black/60 flex items-center justify-center hidden z-50">
 
-            <div class="bg-gray-800 rounded-2xl p-8 w-96 border border-gray-700 relative">
+            <div class="{{ $bgCard }} rounded-2xl p-8 w-96 border {{ $borderCard }} relative">
 
                 {{-- CLOSE BUTTON --}}
                 <button
                     onclick="closeEndModal()"
-                    class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl">
+                    class="absolute top-4 right-4 {{ $textMuted }} hover:{{ $textStrong }} text-xl">
                     ✕
                 </button>
 
@@ -472,7 +503,7 @@
                     Termin wirklich beenden?
                 </h3>
 
-                <p class="text-gray-400 text-center mb-6">
+                <p class="{{ $textMuted }} text-center mb-6">
                     Der aktuelle Termin wird sofort beendet.
                 </p>
 
@@ -480,7 +511,7 @@
 
                     <button
                         onclick="closeEndModal()"
-                        class="flex-1 bg-gray-700 hover:bg-gray-600 py-3 rounded-lg">
+                        class="flex-1 {{ $bgBtn }} {{ $textBtn }} py-3 rounded-lg">
                         Abbrechen
                     </button>
 
@@ -495,6 +526,17 @@
             </div>
 
         </div>
+
+        <script>
+            const THEME = {
+                borderCard: '{{ $borderCard }}',
+                borderCurrent: '{{ $borderCurrent }}',
+                bgEventCard: '{{ $bgEventCard }}',
+                textMuted: '{{ $textMuted }}',
+                bgBtn: '{{ $bgBtn }}',
+                textBtn: '{{ $textBtn }}',
+            }
+        </script>
 
         <script>
             /* CLOCK */
@@ -558,17 +600,17 @@
 
                         let cal = ''
                         if (data.current) {
-                            cal += '<div class="rounded-xl border border-white bg-gray-900 p-4"><div class="text-base text-gray-400">' + escHtml(data.current.start) + ' – ' + escHtml(data.current.end) + '</div><div class="text-xl font-semibold">' + escHtml(data.current.subject) + '</div></div>'
+                            cal += '<div class="rounded-xl border ' + THEME.borderCurrent + ' ' + THEME.bgEventCard + ' p-4"><div class="text-base ' + THEME.textMuted + '">' + escHtml(data.current.start) + ' – ' + escHtml(data.current.end) + '</div><div class="text-xl font-semibold">' + escHtml(data.current.subject) + '</div></div>'
                         }
                         for (const e of data.futureEvents) {
-                            cal += '<div class="rounded-xl border border-gray-700 bg-gray-900 p-4"><div class="text-base text-gray-400">' + escHtml(e.start) + ' – ' + escHtml(e.end) + '</div><div class="text-xl font-semibold">' + escHtml(e.subject) + '</div></div>'
+                            cal += '<div class="rounded-xl border ' + THEME.borderCard + ' ' + THEME.bgEventCard + ' p-4"><div class="text-base ' + THEME.textMuted + '">' + escHtml(e.start) + ' – ' + escHtml(e.end) + '</div><div class="text-xl font-semibold">' + escHtml(e.subject) + '</div></div>'
                         }
                         document.getElementById("calendar-events").innerHTML = cal
 
                         const btnEl = document.getElementById("action-button")
                         btnEl.innerHTML = data.current
                             ? '<button onclick="openEndModal()" class="w-full bg-red-500 text-white font-semibold py-4 text-lg rounded-xl hover:bg-red-600 transition">Termin beenden</button>'
-                            : '<button onclick="openBookingModal()" class="w-full bg-white text-black font-semibold py-4 text-lg rounded-xl hover:bg-gray-200 transition">Jetzt buchen</button>'
+                            : '<button onclick="openBookingModal()" class="w-full ' + THEME.bgBtn + ' ' + THEME.textBtn + ' font-semibold py-4 text-lg rounded-xl transition">Jetzt buchen</button>'
 
                         updateBackground(data.status)
                     })
