@@ -137,7 +137,7 @@ $iconColor     = $dark ? 'text-white'      : 'text-gray-700';
                     @endif
                 </div>
 
-                <h1 class="text-7xl font-bold flex items-center gap-5 pt-3">
+                <h1 class="text-8xl font-bold flex items-center gap-5 pt-3">
                     {{ $room->name }}
                 </h1>
 
