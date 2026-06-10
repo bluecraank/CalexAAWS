@@ -162,19 +162,19 @@ $iconColor     = $dark ? 'text-white'      : 'text-gray-700';
                         @if($current)
 
                         <span class="inline-flex items-center gap-2 text-red-400">
-                            <span class="inline-block w-4 h-4 rounded-full bg-red-400"></span> Belegt
+                            <span class="inline-block w-8 h-8 rounded-full bg-red-400"></span> Belegt
                         </span>
 
                         @elseif($next && $minutes <= $warningThreshold)
 
                             <span class="inline-flex items-center gap-2 text-yellow-400">
-                                <span class="inline-block w-4 h-4 rounded-full bg-yellow-400"></span> Nur noch kurz verfügbar
+                                <span class="inline-block w-8 h-8 rounded-full bg-yellow-400"></span> Nur noch kurz verfügbar
                             </span>
 
                             @else
 
                             <span class="inline-flex items-center gap-2 text-green-400">
-                                <span class="inline-block w-4 h-4 rounded-full bg-green-400"></span> Frei
+                                <span class="inline-block w-8 h-8 rounded-full bg-green-400"></span> Frei
                             </span>
 
                             @endif
@@ -586,11 +586,11 @@ $iconColor     = $dark ? 'text-white'      : 'text-gray-700';
 
                         const statusEl = document.getElementById("status-block")
                         if (data.status === "busy") {
-                            statusEl.innerHTML = '<span class="inline-flex items-center gap-2 text-red-400"><span class="inline-block w-4 h-4 rounded-full bg-red-400"></span> Belegt</span>'
+                            statusEl.innerHTML = '<span class="inline-flex items-center gap-2 text-red-400"><span class="inline-block w-8 h-8 rounded-full bg-red-400"></span> Belegt</span>'
                         } else if (data.status === "warning") {
-                            statusEl.innerHTML = '<span class="inline-flex items-center gap-2 text-yellow-400"><span class="inline-block w-4 h-4 rounded-full bg-yellow-400"></span> Nur noch kurz verfügbar</span>'
+                            statusEl.innerHTML = '<span class="inline-flex items-center gap-2 text-yellow-400"><span class="inline-block w-8 h-8 rounded-full bg-yellow-400"></span> Nur noch kurz verfügbar</span>'
                         } else {
-                            statusEl.innerHTML = '<span class="inline-flex items-center gap-2 text-green-400"><span class="inline-block w-4 h-4 rounded-full bg-green-400"></span> Frei</span>'
+                            statusEl.innerHTML = '<span class="inline-flex items-center gap-2 text-green-400"><span class="inline-block w-8 h-8 rounded-full bg-green-400"></span> Frei</span>'
                         }
 
                         const nextEl = document.getElementById("next-meeting-block")
